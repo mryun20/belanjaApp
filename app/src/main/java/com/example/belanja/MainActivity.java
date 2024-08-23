@@ -1,28 +1,24 @@
 package com.example.belanja;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     static ArrayList<String> items;
     static ListViewAdapter adapter;
     EditText input;
+    static Float totalAmount;
+    private static WeakReference<TextView> viewWeakReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         buttonAdd = findViewById(R.id.btn_add);
         buttonSub = findViewById(R.id.btn_sub);
+
         textAnswer = findViewById(R.id.answer);
+        viewWeakReference = new WeakReference<>(textAnswer);
 
         buttonAdd.setOnClickListener(this);
         buttonSub.setOnClickListener(this);
@@ -51,16 +51,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         listView = findViewById(R.id.listview);
         items = new ArrayList<>();
-        items.add("50");
-        items.add("-30");
 
         adapter = new ListViewAdapter(getApplicationContext(), items);
         listView.setAdapter(adapter);
 
+        totalAmount = 0f;
+
+        //delete single item when long press on listview
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getApplicationContext(),"delete " + items.get(i),Toast.LENGTH_LONG).show();
+//                Toast.makeText(getApplicationContext(),"delete " + items.get(i),Toast.LENGTH_LONG).show();
                 removeItem(i);
                 return false;
             }
@@ -72,14 +73,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void addItem(String item){
         items.add(item);
+        calculateTotal(items);
         listView.setAdapter(adapter);
     }
 
     public static void removeItem(int remove){
+        float f = Float.parseFloat(items.get(remove));
+        String d = Float.toString(totalAmount - f);
+        totalAmount = totalAmount-f;
         items.remove(remove);
+        viewWeakReference.get().setText(d);
         listView.setAdapter(adapter);
     }
 
+    //hide soft keyboard after use
     private void closeKeyborad() {
         View view = this.getCurrentFocus();
         if (view != null){
@@ -88,7 +95,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //do calculation and viewing the result
+    private void calculateTotal(ArrayList<String> items){
+        totalAmount = 0f;
+        for (String item : items) {
+            Float amount = Float.parseFloat(item);
+            totalAmount = totalAmount + amount;
+        }
+        textAnswer.setText(String.valueOf(totalAmount));
+    }
+
+    //getting record data on storage files
     public void loadContent(){
+
         File path = getApplicationContext().getFilesDir();
         File readFrom = new File(path, "list.txt");
         byte[] content = new byte[(int) readFrom.length()];
@@ -101,11 +120,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String s = new String(content);
             // [no1, no2, no3]
             s = s.substring(1,s.length() -1);
-            String spilt[] = s.split(", ");
 
-            items = new ArrayList<>(Arrays.asList(spilt));
-            adapter = new ListViewAdapter(this,items);
-            listView.setAdapter(adapter);
+            if(s.isEmpty() ){
+                Toast.makeText(getApplicationContext()," Empty list " + s, Toast.LENGTH_LONG ).show();
+                textAnswer.setText("0.00");
+                textAnswer.setTextColor(Color.GREEN);
+
+                Log.d("print here", "Emtpy Loading starting array "+ items);
+            }else {
+                totalAmount = 0f;
+                String spilt[] = s.split(", ");
+                items = new ArrayList<>(Arrays.asList(spilt));
+                calculateTotal(items);
+                adapter = new ListViewAdapter(this, items);
+                listView.setAdapter(adapter);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //saving data to local file storage when user close the app
     @Override
     protected void onDestroy() {
         File path = getApplicationContext().getFilesDir();
@@ -126,17 +156,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
+    //getting input field based on user inserted and update the view,hide keyboard
     @Override
     public void onClick(View view) {
         String text = input.getText().toString();
         if(view.getId() == R.id.btn_add){
-            if(text == null || text.length() == 0){
-                Toast.makeText(getApplicationContext()," put amount", Toast.LENGTH_LONG ).show();
+            if(text.equalsIgnoreCase("")){
+
             } else {
                 addItem(text);
                 input.getText().clear();
                 closeKeyborad();
-                textAnswer.setText("tambah " + input.getText().toString());
+//                textAnswer.setText("tambah " + input.getText().toString());
             }
 
         }else if(view.getId() == R.id.btn_sub){

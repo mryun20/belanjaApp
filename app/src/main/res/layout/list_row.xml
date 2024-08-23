@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="5sp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -27,7 +28,7 @@
         android:id="@+id/remove"
         android:layout_marginEnd="18sp"
         android:layout_width="22sp"
-        android:src="@drawable/remove"
+        android:src="@drawable/bin"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_height="22sp">

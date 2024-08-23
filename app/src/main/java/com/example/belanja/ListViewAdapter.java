@@ -2,6 +2,7 @@ package com.example.belanja;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,7 @@ public class ListViewAdapter extends ArrayAdapter<String> {
             convertView = layoutInflater.inflate(R.layout.list_row, null);
 
             TextView number = convertView.findViewById(R.id.number);
-            number.setText(position + 1 + " .");
+            number.setText(position + " .");
 
             TextView name = convertView.findViewById(R.id.name);
             name.setText(list.get(position));
@@ -43,6 +44,7 @@ public class ListViewAdapter extends ArrayAdapter<String> {
                 @Override
                 public void onClick(View view) {
                     MainActivity.removeItem(position);
+                    Log.d("print here", "Click bin pressed position " + position);
                 }
             });
 
