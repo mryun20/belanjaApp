@@ -19,7 +19,12 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -60,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             }
         });
+
+        loadContent();
+
     }
 
     public void addItem(String item){
@@ -78,6 +86,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             inputMethodManager.hideSoftInputFromWindow(view.getWindowToken() , 0);
         }
+    }
+
+    public void loadContent(){
+        File path = getApplicationContext().getFilesDir();
+        File readFrom = new File(path, "list.txt");
+        byte[] content = new byte[(int) readFrom.length()];
+
+        FileInputStream stream = null;
+        try {
+            stream = new FileInputStream(readFrom);
+            stream.read(content);
+
+            String s = new String(content);
+            // [no1, no2, no3]
+            s = s.substring(1,s.length() -1);
+            String spilt[] = s.split(", ");
+
+            items = new ArrayList<>(Arrays.asList(spilt));
+            adapter = new ListViewAdapter(this,items);
+            listView.setAdapter(adapter);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        File path = getApplicationContext().getFilesDir();
+        try {
+            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
+            writer.write(items.toString().getBytes());
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        super.onDestroy();
     }
 
     @Override
