@@ -18,6 +18,8 @@ import java.util.ArrayList;
 public class ListViewAdapter extends ArrayAdapter<String> {
     ArrayList<String> list;
     Context context;
+    private MainActivity  mainActivity;
+
 
     public ListViewAdapter(Context context, ArrayList<String> items) {
         super(context, R.layout.list_row, items);
@@ -43,8 +45,7 @@ public class ListViewAdapter extends ArrayAdapter<String> {
             remove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    MainActivity.removeItem(position);
-                    Log.d("print here", "Click bin pressed position " + position);
+                    MainActivity.getInstance().removeItem(position);
                 }
             });
 

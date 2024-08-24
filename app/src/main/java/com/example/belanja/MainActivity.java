@@ -26,16 +26,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Button buttonAdd, buttonSub;
     TextView textAnswer;
-    static ListView listView;
-    static ArrayList<String> items;
-    static ListViewAdapter adapter;
+    ListView listView;
+    ArrayList<String> items;
+    ListViewAdapter adapter;
     EditText input;
-    static Float totalAmount;
-    private static WeakReference<TextView> viewWeakReference;
+
+    Float totalAmount;
+    private WeakReference<TextView> viewWeakReference;
+    private static MainActivity instance;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
+
         setContentView(R.layout.activity_main);
 
         buttonAdd = findViewById(R.id.btn_add);
@@ -61,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Toast.makeText(getApplicationContext(),"delete " + items.get(i),Toast.LENGTH_LONG).show();
                 removeItem(i);
                 return false;
             }
@@ -71,19 +75,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
     public void addItem(String item){
         items.add(item);
         calculateTotal(items);
+        adapter.notifyDataSetChanged();
         listView.setAdapter(adapter);
+        Log.d("done add ", items.toString());
+        File path = getApplicationContext().getFilesDir();
+        try {
+            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
+            writer.write(items.toString().getBytes());
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        amountColor(totalAmount);
     }
 
-    public static void removeItem(int remove){
+    public void removeItem(int remove){
         float f = Float.parseFloat(items.get(remove));
         String d = Float.toString(totalAmount - f);
         totalAmount = totalAmount-f;
         items.remove(remove);
         viewWeakReference.get().setText(d);
         listView.setAdapter(adapter);
+        File path = getApplicationContext().getFilesDir();
+        try {
+            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
+            writer.write(items.toString().getBytes());
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        amountColor(totalAmount);
     }
 
     //hide soft keyboard after use
@@ -103,6 +131,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             totalAmount = totalAmount + amount;
         }
         textAnswer.setText(String.valueOf(totalAmount));
+        amountColor(totalAmount);
+    }
+
+    //check total amount and change color
+    public void amountColor(Float amounts){
+        Float x = amounts;
+        if( x < 0f){
+            textAnswer.setTextColor(Color.RED);
+        } else {
+            textAnswer.setTextColor(Color.GREEN);
+        }
     }
 
     //getting record data on storage files
@@ -122,11 +161,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             s = s.substring(1,s.length() -1);
 
             if(s.isEmpty() ){
-                Toast.makeText(getApplicationContext()," Empty list " + s, Toast.LENGTH_LONG ).show();
+                Toast.makeText(getApplicationContext()," List was empty " + s, Toast.LENGTH_LONG ).show();
                 textAnswer.setText("0.00");
-                textAnswer.setTextColor(Color.GREEN);
-
-                Log.d("print here", "Emtpy Loading starting array "+ items);
+                amountColor(0f);
             }else {
                 totalAmount = 0f;
                 String spilt[] = s.split(", ");
@@ -167,11 +204,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 addItem(text);
                 input.getText().clear();
                 closeKeyborad();
-//                textAnswer.setText("tambah " + input.getText().toString());
             }
 
         }else if(view.getId() == R.id.btn_sub){
-            textAnswer.setText("tolak "+ input.getText().toString());
+            if(text.equalsIgnoreCase("")){
+
+            } else {
+                addItem("-" + text);
+                input.getText().clear();
+                closeKeyborad();
+            }
         }
 
     }
