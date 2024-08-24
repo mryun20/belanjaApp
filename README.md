@@ -11,6 +11,8 @@ https://github.com/mryun20/belanjaApp.git
 ```
 Run YourApp by Android Studio Menu > Run > Run YourApp.
 
+![Screenshot 2024-08-24 224041](https://github.com/user-attachments/assets/0ec899a5-7160-4d98-871b-9ea177e85493)
+
 ## Android Specifications
 Android Studio Version: 2024.1.1 Gradle Version: 8.7 Minimum Android SDK: 19 Target Android SDK: 28
 ## Usage
