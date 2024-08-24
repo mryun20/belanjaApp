@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        //save to local files when apps being close
         loadContent();
 
     }
@@ -79,12 +80,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return instance;
     }
 
+    //add item and update listview
     public void addItem(String item){
         items.add(item);
         calculateTotal(items);
         adapter.notifyDataSetChanged();
         listView.setAdapter(adapter);
-        Log.d("done add ", items.toString());
         File path = getApplicationContext().getFilesDir();
         try {
             FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         amountColor(totalAmount);
     }
 
+    //delete item and update listview
     public void removeItem(int remove){
         float f = Float.parseFloat(items.get(remove));
         String d = Float.toString(totalAmount - f);
