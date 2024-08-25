@@ -49,6 +49,7 @@
         <Button
             android:id="@+id/btn_add"
             android:text="+"
+            android:backgroundTint="#008000"
             android:textSize="30sp"
             android:layout_marginEnd="5dp"
             android:layout_width="wrap_content"
@@ -70,6 +71,7 @@
             android:id="@+id/btn_sub"
             android:text="-"
             android:textSize="30sp"
+            android:backgroundTint="#FF0000"
             android:layout_marginEnd="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">

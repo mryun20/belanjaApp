@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class ListViewAdapter extends ArrayAdapter<String> {
@@ -38,7 +39,11 @@ public class ListViewAdapter extends ArrayAdapter<String> {
             number.setText(position + " .");
 
             TextView name = convertView.findViewById(R.id.name);
-            name.setText(list.get(position));
+            DecimalFormat df = new DecimalFormat("0.00###");
+            String text = String.valueOf(list.get(position));
+            Double j = Double.parseDouble(text);
+
+            name.setText(df.format(j));
 
             ImageView remove = convertView.findViewById(R.id.remove);
 
