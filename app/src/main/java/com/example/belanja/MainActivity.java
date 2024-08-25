@@ -3,7 +3,6 @@ package com.example.belanja;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if(s.isEmpty() ){
                 Toast.makeText(getApplicationContext()," List was empty " + s, Toast.LENGTH_LONG ).show();
-                textAnswer.setText("0.00");
+                textAnswer.setText(String.valueOf(0.00));
                 amountColor(0.00);
             }else {
                 totalAmount = 0.00;

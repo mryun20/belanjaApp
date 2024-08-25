@@ -37,7 +37,7 @@ public class ListViewAdapter extends ArrayAdapter<String> {
             convertView = layoutInflater.inflate(R.layout.list_row, null);
 
             TextView number = convertView.findViewById(R.id.number);
-            number.setText(position + " .");
+            number.setText(position + " . ");
 
             TextView name = convertView.findViewById(R.id.name);
             DecimalFormat df = new DecimalFormat("0.00###");
