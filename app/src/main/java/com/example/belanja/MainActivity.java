@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.text.DecimalFormat;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -31,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ListViewAdapter adapter;
     EditText input;
 
-    Double totalAmount;
+    Float totalAmount;
+    private WeakReference<TextView> viewWeakReference;
     private static MainActivity instance;
 
 
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonSub = findViewById(R.id.btn_sub);
 
         textAnswer = findViewById(R.id.answer);
+        viewWeakReference = new WeakReference<>(textAnswer);
 
         buttonAdd.setOnClickListener(this);
         buttonSub.setOnClickListener(this);
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adapter = new ListViewAdapter(getApplicationContext(), items);
         listView.setAdapter(adapter);
 
-        totalAmount = 0.00;
+        totalAmount = 0f;
 
         //delete single item when long press on listview
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -80,31 +82,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //add item and update listview
     public void addItem(String item){
-        double d = Double.parseDouble(item);
-
-        items.add(Double.toString(d));
-        listView.setAdapter(adapter);
-
+        items.add(item);
         calculateTotal(items);
-        saveFiles(items);
+        adapter.notifyDataSetChanged();
+        listView.setAdapter(adapter);
+        File path = getApplicationContext().getFilesDir();
+        try {
+            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
+            writer.write(items.toString().getBytes());
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         amountColor(totalAmount);
     }
 
     //delete item and update listview
-    public void removeItem(int position){
-        Double current = Double.parseDouble(items.get(position));
-        Double afterMinus = totalAmount - current;
-
-        items.remove(position);
+    public void removeItem(int remove){
+        float f = Float.parseFloat(items.get(remove));
+        String d = Float.toString(totalAmount - f);
+        totalAmount = totalAmount-f;
+        items.remove(remove);
+        viewWeakReference.get().setText(d);
         listView.setAdapter(adapter);
-
-        calculateTotal(items);
-        saveFiles(items);
-        amountColor(afterMinus);
+        File path = getApplicationContext().getFilesDir();
+        try {
+            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
+            writer.write(items.toString().getBytes());
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        amountColor(totalAmount);
     }
 
     //hide soft keyboard after use
-    private void closeKeyboard() {
+    private void closeKeyborad() {
         View view = this.getCurrentFocus();
         if (view != null){
             InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -114,37 +127,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     //do calculation and viewing the result
     private void calculateTotal(ArrayList<String> items){
-        totalAmount = 0.00;
+        totalAmount = 0f;
         for (String item : items) {
-            Double amount = Double.parseDouble(item);
+            Float amount = Float.parseFloat(item);
             totalAmount = totalAmount + amount;
         }
-
-        DecimalFormat df = new DecimalFormat("0.00###");
-        String text = String.valueOf(totalAmount);
-        Double j = Double.parseDouble(text);
-
-        textAnswer.setText(df.format(j));
+        textAnswer.setText(String.valueOf(totalAmount));
         amountColor(totalAmount);
     }
 
-    //save data array into list to local storage
-    public void saveFiles(ArrayList<String> items){
-        File path = getApplicationContext().getFilesDir();
-        try {
-            FileOutputStream writer = new FileOutputStream(new File(path, "list.txt"));
-            writer.write(items.toString().getBytes());
-            writer.close();
-        } catch (Exception e) {
-//            e.printStackTrace();
-            String message = "Unexpected NullPointerException in processing!";
-            throw new RuntimeException(message);
-        }
-    }
-
     //check total amount and change color
-    public void amountColor(Double amounts){
-        if( amounts < 0f){
+    public void amountColor(Float amounts){
+        Float x = amounts;
+        if( x < 0f){
             textAnswer.setTextColor(Color.RED);
         } else {
             textAnswer.setTextColor(Color.GREEN);
@@ -170,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(s.isEmpty() ){
                 Toast.makeText(getApplicationContext()," List was empty " + s, Toast.LENGTH_LONG ).show();
                 textAnswer.setText("0.00");
-                amountColor(0.00);
+                amountColor(0f);
             }else {
-                totalAmount = 0.00;
+                totalAmount = 0f;
                 String spilt[] = s.split(", ");
                 items = new ArrayList<>(Arrays.asList(spilt));
                 calculateTotal(items);
@@ -181,9 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         } catch (Exception e) {
-//            e.printStackTrace();
-            String message = "Unexpected NullPointerException in processing!";
-            throw new RuntimeException(message);
+            e.printStackTrace();
         }
 
     }
@@ -197,9 +190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             writer.write(items.toString().getBytes());
             writer.close();
         } catch (Exception e) {
-//            e.printStackTrace();
-            String message = "Unexpected NullPointerException in processing!";
-            throw new RuntimeException(message);
+            e.printStackTrace();
         }
         super.onDestroy();
     }
@@ -214,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 addItem(text);
                 input.getText().clear();
-                closeKeyboard();
+                closeKeyborad();
             }
 
         }else if(view.getId() == R.id.btn_sub){
@@ -223,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } else {
                 addItem("-" + text);
                 input.getText().clear();
-                closeKeyboard();
+                closeKeyborad();
             }
         }
 
